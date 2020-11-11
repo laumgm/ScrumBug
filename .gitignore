@@ -5,6 +5,7 @@
 node_modules/
 data/
 middlewares/
+utils/
 /.pnp
 .pnp.js
 .env
