@@ -10,21 +10,24 @@ const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-  
-  if (user && (await user.matchPassword(password))) {
+
+  if (user && user.isActive && (await user.matchPassword(password))) {
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
+      isActive: user.isActive,
       token: generateToken(user._id),
     });
+  } else if (user && !user.isActive){
+    res.status(401);
+    throw new Error('Account has been deactivated');
   } else {
     res.status(401);
     throw new Error('Invalid email or password');
   }
 });
-
 
 // @desc    Register a new user
 // @route   POST /api/users
@@ -44,7 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     securityQuestion: [question, key]
-  });add
+  });
 
   if (user) {
     res.status(201).json({
