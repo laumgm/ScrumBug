@@ -10,7 +10,7 @@ const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-
+  
   if (user && (await user.matchPassword(password))) {
     res.json({
       _id: user._id,
@@ -24,6 +24,7 @@ const authUser = asyncHandler(async (req, res) => {
     throw new Error('Invalid email or password');
   }
 });
+
 
 // @desc    Register a new user
 // @route   POST /api/users
@@ -43,7 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     securityQuestion: [question, key]
-  });
+  });add
 
   if (user) {
     res.status(201).json({
@@ -52,6 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email: user.email,
       securityQuestion: user.securityQuestion,
       isAdmin: user.isAdmin,
+      isActive: user.isActive,
       token: generateToken(user._id),
     });
   } else {
@@ -179,20 +181,4 @@ export {
   getUserById,
   updateUser,
 };
-  function newFunction() {
-    async function hashKey(key) {
-      const saltRounds = 10;
-      const hashedKey = await new Promise((resolve, reject) => {
-        bcrypt.hash(key, saltRounds, function (err, hash) {
-          if (err)
-            reject(err);
-          resolve(hash);
-        });
-      });
-
-      return hashedKey;
-    }
-    const hashedKey = hashKey();
-    return hashedKey;
-  }
 
