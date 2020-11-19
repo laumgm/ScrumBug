@@ -9,7 +9,6 @@ const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-  console.log(await user.matchPassword(password));
 
   if (user && user.isActive && await user.matchPassword(password)) {
     res.json({
@@ -18,7 +17,7 @@ const authUser = asyncHandler(async (req, res) => {
       email: user.email,
       isAdmin: user.isAdmin,
       isActive: user.isActive,
-      // token: generateToken(user._id),
+      token: generateToken(user._id),
     });
   } else if (user && !user.isActive){
     res.status(401);
@@ -36,7 +35,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, securityQuestion, securityAnswer} = req.body;
   
   const userExists = await User.findOne({ email });
-
+  
   if (userExists) {
     res.status(400);
     throw new Error('User already exists');
@@ -89,7 +88,6 @@ const compareData = asyncHandler(async (req, res) => {
     res.status(401);
     throw new Error('Invalid Credentials');
   }
-  
 });
 
 // @desc    Get user profile
