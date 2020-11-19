@@ -17,8 +17,12 @@ const userSchema = mongoose.Schema(
       required: true,
     },
     securityQuestion: {
-      type: [String],
+      type: String,
       required: true
+    },
+    securityAnswer: {
+      type: String,
+      required: true,
     },
     isAdmin: {
       type: Boolean,
@@ -36,24 +40,24 @@ const userSchema = mongoose.Schema(
   }
 );
 
-userSchema.methods.matchPassword = async function (enteredPassword, enteredKey) {
-  let password = new Array();
-  password.push(await bcrypt.compare(enteredPassword, this.password));
-  password.push(await bcrypt.compare(enteredKey, this.securityQuestion[1]));
-
-  return password;
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
-userSchema.pre('save', async function (next) {
-   this.securityQuestion[1] = this.securityQuestion[1].toLowerCase();
+userSchema.methods.compareAnswer = async function (enteredKey) {
+  return await bcrypt.compare(enteredKey, this.securityAnswer);
+}
 
-  if (!this.isModified('password') && !this.isModified('securityQuestion[1]')) {
+userSchema.pre('save', async function (next) {
+   this.securityAnswer = this.securityAnswer.toLowerCase();
+
+  if (!this.isModified('password') && !this.isModified('securityAnswer')) {
     next();
   }
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  this.securityQuestion[1] = await bcrypt.hash(this.securityQuestion[1], salt);
+  this.securityAnswer = await bcrypt.hash(this.securityAnswer, salt);
 });
 
 const User = mongoose.model('User', userSchema);

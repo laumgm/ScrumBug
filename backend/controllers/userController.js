@@ -7,19 +7,18 @@ import User from '../models/userModel.js';
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  let hPassword = new Array();
 
   const user = await User.findOne({ email });
-  hPassword = await user.matchPassword(password, '');
+  console.log(await user.matchPassword(password));
 
-  if (user && user.isActive && hPassword[0]) {
+  if (user && user.isActive && await user.matchPassword(password)) {
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
       isActive: user.isActive,
-      token: generateToken(user._id)
+      // token: generateToken(user._id),
     });
   } else if (user && !user.isActive){
     res.status(401);
@@ -34,7 +33,7 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, question, key} = req.body;
+  const { name, email, password, securityQuestion, securityAnswer} = req.body;
   
   const userExists = await User.findOne({ email });
 
@@ -47,7 +46,8 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password,
-    securityQuestion: [question, key]
+    securityQuestion,
+    securityAnswer
   });
 
   if (user) {
@@ -56,9 +56,10 @@ const registerUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       securityQuestion: user.securityQuestion,
+      securityAnswer: user.securityAnswer,
       isAdmin: user.isAdmin,
       isActive: user.isActive,
-      token: generateToken(user._id)
+      token: generateToken(user._id),
     });
   } else {
     res.status(400);
@@ -66,6 +67,30 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc  Forgot Password
+const compareData = asyncHandler(async (req, res) => {
+  let { email, question, answer } = req.body;
+  const user = await User.findOne({ email });
+
+  answer = answer.toLowerCase();
+  
+  if (user && 
+    user.securityQuestion == question &&
+    (await user.compareAnswer(answer))) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      securityQuestion: user.securityQuestion, 
+      seucirtyAnswer: user.securityAnswer,  
+      isAdmin: user.isAdmin,
+    });
+  } else {
+    res.status(401);
+    throw new Error('Invalid Credentials');
+  }
+  
+});
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -179,6 +204,7 @@ const updateUser = asyncHandler(async (req, res) => {
 export {
   authUser,
   registerUser,
+  compareData,
   getUserProfile,
   updateUserProfile,
   getUsers,
