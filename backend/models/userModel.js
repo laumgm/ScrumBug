@@ -36,12 +36,12 @@ const userSchema = mongoose.Schema(
   }
 );
 
-userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password)
-};
+userSchema.methods.matchPassword = async function (enteredPassword, enteredKey) {
+  let password = new Array();
+  password.push(await bcrypt.compare(enteredPassword, this.password));
+  password.push(await bcrypt.compare(enteredKey, this.securityQuestion[1]));
 
-userSchema.methods.comparePassword = async function (enteredKey) {
-  return await bcrypt.compare(enteredKey, this.securityQuestion[1]);
+  return password;
 };
 
 userSchema.pre('save', async function (next) {

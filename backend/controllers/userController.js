@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
 import generateToken from '../utils/generateToken.js';
 import User from '../models/userModel.js';
@@ -8,17 +7,19 @@ import User from '../models/userModel.js';
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+  let hPassword = new Array();
 
   const user = await User.findOne({ email });
+  hPassword = await user.matchPassword(password, '');
 
-  if (user && user.isActive && (await user.matchPassword(password))) {
+  if (user && user.isActive && hPassword[0]) {
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
       isActive: user.isActive,
-      token: generateToken(user._id),
+      token: generateToken(user._id)
     });
   } else if (user && !user.isActive){
     res.status(401);
@@ -57,13 +58,14 @@ const registerUser = asyncHandler(async (req, res) => {
       securityQuestion: user.securityQuestion,
       isAdmin: user.isAdmin,
       isActive: user.isActive,
-      token: generateToken(user._id),
+      token: generateToken(user._id)
     });
   } else {
     res.status(400);
     throw new Error('Invalid user data');
   }
 });
+
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -123,7 +125,7 @@ const getUsers = asyncHandler(async (req, res) => {
 // @desc    Delete user
 // @route   DELETE /api/users/:id
 // @access  Private/Admin
-const deleteUser = asyncHandler(async (req, res) => {
+const deleteUser = asyncHandler(async (req, res) => {       //CONT
   const user = await User.findById(req.params.id);
 
   if (user) {
