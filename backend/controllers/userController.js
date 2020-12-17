@@ -81,7 +81,7 @@ const compareData = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       securityQuestion: user.securityQuestion, 
-      seucirtyAnswer: user.securityAnswer,
+      securityAnswer: user.securityAnswer,
       isAdmin: user.isAdmin,
     });
   } else {
