@@ -2,7 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Movie from '../models/movieModel.js';
 
 const addMovie = asyncHandler(async (req, res) => {
-    const {title, mainCast, director, poster, language, genre, duration, releasedDate, endScreening} = req.body;
+    const {title, mainCast, director, poster, language, genre, duration, releasedDate, endScreening, cinemaNumber, startTime, endTime} = req.body;
 
     //const movieExists
     console.log("addMovie")
@@ -17,7 +17,10 @@ const addMovie = asyncHandler(async (req, res) => {
         genre,
         duration,
         releasedDate,
-        endScreening
+        endScreening,
+        cinemaNumber,
+        startTime,
+        endTime
     })
 
     if (movie) {
